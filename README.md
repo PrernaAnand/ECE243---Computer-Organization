@@ -1,2 +1,3 @@
 # ECE243---Computer-Organization
-Verilog and Assembly
+Verilog, Assembly and C
+Contains all the labs.
