@@ -1,0 +1,99 @@
+			.text
+			.global _start
+_start:
+	    MOV		R0, #0							// initialize infinite counter
+            LDR		R8, =0xFF200030			// load HEX 4-5 address into R8
+            STR		R0, [R8]			// store R0 to HEX (this causes the HEX to display nothing)
+            MOV		R3, #0
+
+MAIN:       CMP         R3, #9							// resetting incrementing value (call R3 the INCREMENT REGISTER)
+	    MOVEQ       R3, #0						        // This value is used to increment or decrement the counter
+	
+             									// depending on which key is pressed. If key 1, value is set to 1
+										// and if key 2, value is set to -1
+	    LDR		R1, =0xff200000			 // set address to point to output devices
+            LDR		R2, [R1, #0x50]		         // load value of keys into R1
+
+
+            CMP		R2, #0x8			// if KEY[3:0] >= 4'b1000
+            BGE		BLANK				// i.e. KEY 3 has been pressed; program will proceed to BLANK to clear the HEX display
+
+            CMP		R2, #0x4			// if KEY[3:0] == 4'b0100
+            SUBEQ	R3, #0x1			// i.e. KEY 2 has been pressed; program will set value of INCREMENT REGISTER to -1
+
+            CMP		R2, #0x2			// if KEY[3:0] == 4'b0010
+            ADDEQ	R3, #0x1			// i.e. KEY 1 has been pressed; program will set value of INCREMENT REGISTER to 1
+
+            CMP		R2, #0x1			// if KEY[3:0] == 4'b0001
+            BEQ		ZERO				// KEY 0 has been pressed; program will proceed to ZERO to reset the counter to 0
+
+            MOV		R0, R3				// add INCREMENT REGISTER to counter to increment/decrement its value
+            
+            CMP         R2, #0x0
+            BEQ         MAIN
+            
+            B		DISPLAY				// proceed to display to display the current count value on HEX
+
+ZERO:	    MOV		R0, #0				// resets counter to 0
+	    B		DISPLAY				// proceed to display to display the current count value on HEX
+
+BLANK:	    MOV		R0, #0				// R0 is used as a temporary register to hold 32'b000.... which will be used to blank the HEX
+            LDR		R8, =0xFF200020			// load HEX 0-3 address into R8
+            STR		R0, [R8]			// store R0 to HEX (this causes the HEX to display nothing)
+            
+LOOP_CH:    LDR		R2, =0xff200050
+            LDR		R2, [R2]		         // load value of keys into R1
+            CMP         R2, #0x0
+            BNE         LOOP_CH
+            MOV         R3, #0
+	    B		MAIN									// loop to MAIN
+
+
+DISPLAY:    PUSH	{ R0 }			        // push current counter value to STACK to save the value
+							// R0 will be reused multiple times in this subroutine, therefore the push is necessary
+
+	    LDR         R8, =0xFF200020 		// load base address of HEX3-HEX0
+            BL          DIVIDE          		// convert the binary value to decimal value
+
+            MOV         R9, R1          		// save the quotient
+            BL          SEG7_CODE       		// get bit code of the remainder (digit for HEX0)
+            MOV         R4, R0          		// save bit code of remainder (digit for HEX0) in R4
+
+	    STR		R4, [R8]			// store the bit codes of the rightmost four digits to the HEX0-HEX3
+
+LOOP_C:     LDR		R2, =0xff200050
+            LDR		R2, [R2]		         // load value of keys into R1
+            CMP         R2, #0x0
+            BNE         LOOP_C         			// pop the counter value to restore it to R0           
+            POP		{ R0 }	
+            B		MAIN				// loop to MAIN
+
+/* Subroutine that uses BIT_CODES to receive bit pattern that causes the HEX to
+ * light up. Input:		i.	decimal value to be displayed (in R0)
+ 	     Output:	        ii.	bit code for decimal value (in R0)
+ */
+SEG7_CODE:  MOV   R1, #BIT_CODES
+            ADD   R1, R0 		        	// index into the BIT_CODES "array"
+            LDRB  R0, [R1]						// load the bit pattern (to be returned)
+            BX    LR
+
+BIT_CODES:  .byte 0b00111111, 0b00000110, 0b01011011, 0b01001111, 0b01100110
+            .byte 0b01101101, 0b01111101, 0b00000111, 0b01111111, 0b01100111
+            .skip 2      							// pad with 2 bytes to maintain word alignment
+
+/* Subroutine that converts a binary number to decimal
+ * It is used to convert the binary counter value to decimal in order to be
+ * displayed on the HEX. Input: 	i.	dividend (in R0)
+ * 			Output: 	i.	remainder (in R0)
+ 					ii.	quotient (in R2)
+ */
+DIVIDE:	    MOV		R2, #0							// counter = quotient
+
+CONT:	    CMP		R0, #10							// compares the remainder with the divisor
+            BLT 	DIV_END							// if (R0 < R6), branch to DIV_END
+            SUB 	R0, #10							// remainder = quotient - divisor
+            ADD 	R2, #1							// increment counter
+            B 		CONT								// branches to CONT
+
+DIV_END:    MOV 	R1, R2							// quotient in R1 (remainder in R0)
+	    BX 		LR									// branches back to _start

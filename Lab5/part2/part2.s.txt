@@ -1,0 +1,71 @@
+	.text
+	.global _start
+_start:
+	    MOV         R0, #0	                        // initialize counter
+            LDR		R6, =0xFF20005C                 //edge capture
+            LDR         R8, =0xFF200020 		// base address of HEX3-HEX0
+            STR		R0, [R8]
+
+MAIN:	    CMP		R0, #99
+	    MOVGT	R0, #0
+			
+            LDR		R6, =0xFF20005C
+            LDR		R5, [R6]		// check if any KEY is pressed
+            CMP		R5, #0
+            	
+            ADDEQ	R0, #1
+            BEQ		DISPLAY                //If zero - keep adding
+
+            MOV 	R5, #0b1111
+            STR 	R5, [R6]
+
+DELAY2:     LDR         R3, =0xFF200050
+            LDR         R3, [R3]
+            CMP         R3, #0
+            BNE         DELAY2
+
+            B           MAIN
+            
+            
+DISPLAY:    PUSH	{ R0 }
+            BL          DIVIDE          		// ones digit will be in R0; tens digit in R1
+            
+            MOV         R9, R1          		// save the tens digit
+            BL          SEG7_CODE       
+            MOV         R4, R0          		// save bit code
+            
+            MOV         R0, R9
+            BL          SEG7_CODE       
+	    LSL         R0, #8
+            ORR         R4, R0
+            
+            STR		R4, [R8]
+            
+            POP		{ R0 }
+            B		DO_DELAY
+            
+DO_DELAY:   LDR		R3, =12500000
+SUB_LOOP:   SUBS	R3, #1
+	    BNE		SUB_LOOP
+            BEQ		MAIN
+
+SEG7_CODE:  MOV         R1, #BIT_CODES  
+            ADD         R1, R0 		        	// index into the BIT_CODES "array"
+            LDRB        R0, [R1]			// load the bit pattern (to be returned)
+            BX          LR              
+
+BIT_CODES:  .byte   0b00111111, 0b00000110, 0b01011011, 0b01001111, 0b01100110
+            .byte   0b01101101, 0b01111101, 0b00000111, 0b01111111, 0b01100111
+            .skip   2      					// pad with 2 bytes to maintain word alignment
+
+
+DIVIDE:	    MOV		R2, #0					// counter = quotient
+
+CONT:	    CMP		R0, #10					// compares the remainder with the divisor
+            BLT 	DIV_END					// if (R0 < R6), branch to DIV_END
+            SUB 	R0, #10					// remainder = quotient - divisor
+            ADD 	R2, #1					// increment counter
+            B 		CONT					// branches to CONT
+
+DIV_END:    MOV 	R1, R2					// quotient in R1 (remainder in R0)
+	    BX 		LR					// branches back to _start
