@@ -1,0 +1,111 @@
+m255
+K4
+z2
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+Z0 dC:/Prerna/Uni - work/ECE243/Lab1/Lab1part1/Modelsim
+vdec3to8
+Z1 !s110 1548801255
+!i10b 1
+!s100 55oe_?X=h?GaLOTmJ4czb0
+I<hPDGk@22D`84K3c[UQC>3
+Z2 VDg1SIo80bB@j0V0VzS_@n1
+R0
+Z3 w1548041975
+Z4 8../proc.v
+Z5 F../proc.v
+L0 184
+Z6 OV;L;10.5b;63
+r1
+!s85 0
+31
+Z7 !s108 1548801255.000000
+Z8 !s107 ../proc.v|../Lab1part1.v|
+Z9 !s90 -reportprogress|300|../Lab1part1.v|../proc.v|
+!i113 1
+Z10 tCvgOpt 0
+vLab1part1
+R1
+!i10b 1
+!s100 UB5JV=INOg=Znj899e>hD2
+I8MLoM_M`KnDW84`45=o<P3
+R2
+R0
+w1547758778
+8../Lab1part1.v
+F../Lab1part1.v
+L0 4
+R6
+r1
+!s85 0
+31
+R7
+R8
+R9
+!i113 1
+R10
+n@lab1part1
+vproc
+R1
+!i10b 1
+!s100 R@97WZL]nR_8R55[<LJ>k3
+I1K4C:<P4<:^PAOQf^km:32
+R2
+R0
+R3
+R4
+R5
+L0 3
+R6
+r1
+!s85 0
+31
+R7
+R8
+R9
+!i113 1
+R10
+vregn
+R1
+!i10b 1
+!s100 MB=R=QhhdMU7R1gBDRic?0
+Ib;UTPYXlZz=EFa=H_8UkP3
+R2
+R0
+R3
+R4
+R5
+L0 208
+R6
+r1
+!s85 0
+31
+R7
+R8
+R9
+!i113 1
+R10
+vtestbench
+R1
+!i10b 1
+!s100 N2m[:<c_mSR:C8P1<3^I50
+ID?_49Sih>2^j=mT8[>EFf2
+R2
+R0
+w1548043382
+8testbench.v
+Ftestbench.v
+L0 3
+R6
+r1
+!s85 0
+31
+R7
+!s107 testbench.v|
+!s90 -reportprogress|300|testbench.v|
+!i113 1
+R10
